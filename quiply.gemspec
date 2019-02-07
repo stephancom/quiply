@@ -37,6 +37,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'activerecord', '~> 5.2.2'
+  spec.add_dependency 'groupdate', '~> 4.1.0'
   spec.add_dependency 'methadone', '~> 2.0.0'
   spec.add_dependency 'ruby-progressbar', '~> 1.10.0'
   spec.add_dependency 'smarter_csv', '~> 1.2.6'

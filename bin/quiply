@@ -13,6 +13,7 @@ require 'methadone'
 require 'pry'
 require 'ruby-progressbar'
 require 'smarter_csv'
+require 'groupdate'
 require 'quiply'
 
 include Methadone::Main
@@ -51,11 +52,34 @@ main do |users_csv, orders_csv|
   progressbar.finish
 
   puts "there are now #{User.count} users with #{Order.count} orders"
+
+  rows = []
+  by_week = User.group_by_week(:created_at).count
+# pry
+  by_week.each do |week, count|
+    # we're not using it yet, but find the users anyway
+    timespan = week..(week + 1.week)
+    users = User.where(created_at: timespan)
+    rows << [
+      "#{week.strftime('%-m/%-d')}-#{(week + 1.week).strftime('%-m/%-d')}",
+      "#{count} users", # pluralize?
+      '??', # collect underpants
+      '??',
+      '??'
+    ]
+  end
+
+  table = Terminal::Table.new rows: rows.reverse,
+                              headings: %w[Cohort Users 0-7 7-14 14-21 ...],
+                              title: 'Cohort Challenge'
+  table.align_column(1, :right)
+  puts table
   pry
 end
 
 options[:weeks] = '8'
 options[:format] = 'txt'
+options[:start_day] = 'sun'
 
 description <<~EODESC
   given input CSV files of orders and users, group users into cohorts joined by week,
@@ -64,7 +88,9 @@ EODESC
 
 on('-w VALUE', '--weeks', 'override total weeks back of cohorts, default: 8')
 formats = %w[txt html csv]
-on('-f VALUE', '--format', formats, 'output format', "(#{formats.join('|')})")
+on('-f VALUE', '--format', formats, 'output format, default: txt', "(#{formats.join('|')})")
+days = %w[sun mon tue wed thu fri sat]
+on('-s VALUE', '--start_day', days, 'day to start week, default: sun', "(#{days.join('|')})")
 
 arg :users_csv, :required, 'input filename for users csv.'
 arg :orders_csv, :required, 'input filename for orders csv.'

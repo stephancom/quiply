@@ -1,4 +1,4 @@
-# Quiply [![Build Status](https://travis-ci.org/stephancom/quiply.svg?branch=master)](https://travis-ci.org/stephancom/quiply)
+# Quiply [![Build Status](https://travis-ci.org/stephancom/quiply.svg?branch=master)](https://travis-ci.org/stephancom/quiply) [![Maintainability](https://api.codeclimate.com/v1/badges/1adc02f150a9309fd857/maintainability)](https://codeclimate.com/github/stephancom/quiply/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/1adc02f150a9309fd857/test_coverage)](https://codeclimate.com/github/stephancom/quiply/test_coverage)
 
 Quip cohort challenge
 

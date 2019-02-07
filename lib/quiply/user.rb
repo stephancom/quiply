@@ -5,7 +5,7 @@ module Quiply
   class User < ActiveRecord::Base
     ActiveRecord::Schema.define do
       create_table :users, force: true do |t|
-        t.integer :old_id, null: false
+        t.integer :old_id, null: false, index: true
         t.timestamps
       end
     end

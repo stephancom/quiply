@@ -38,6 +38,8 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'activerecord', '~> 5.2.2'
   spec.add_dependency 'methadone', '~> 2.0.0'
+  spec.add_dependency 'ruby-progressbar', '~> 1.10.0'
+  spec.add_dependency 'smarter_csv', '~> 1.2.6'
   spec.add_dependency 'sqlite3', '~> 1.3.6'
   spec.add_dependency 'terminal-table', '~> 1.8.0'
 

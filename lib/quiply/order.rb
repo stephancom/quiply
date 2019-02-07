@@ -7,13 +7,13 @@ module Quiply
       create_table :orders, force: true do |t|
         t.integer :old_id, null: false
         t.integer :order_num, null: false
-        t.integer :user_id, null: false
+        t.integer :user_id, null: false, index: true
         t.timestamps
       end
     end
 
     belongs_to :user, primary_key: :old_id, inverse_of: :orders, required: true
-    validates :order_num, uniqueness: true
+    validates :order_num, presence: true # doesn't seem to be unique?
     validates :old_id, uniqueness: true
   end
 end

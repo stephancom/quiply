@@ -11,6 +11,8 @@
 
 require 'methadone'
 require 'pry'
+require 'ruby-progressbar'
+require 'smarter_csv'
 require 'quiply'
 
 include Methadone::Main
@@ -18,8 +20,24 @@ include Methadone::CLILogging
 include Quiply
 
 main do |users_csv, orders_csv|
-  puts "going to read #{users_csv}"
-  puts "going to read #{orders_csv}"
+  users = SmarterCSV.process(users_csv, key_mapping: { id: :old_id })
+  progressbar = ProgressBar.create(total: users.size, title: users_csv, format: '%t %c of %C |%B|')
+  users.each do |u|
+    User.create!(u)
+    progressbar.increment
+  end
+  progressbar.finish
+
+  orders = SmarterCSV.process(orders_csv, key_mapping: { id: :old_id })
+  progressbar = ProgressBar.create(total: orders.size, title: orders_csv, format: '%t %c of %C |%B|')
+  orders.each do |u|
+    Order.create!(u) if User.where(old_id: u[:user_id]).exists? # skip users not present
+    progressbar.increment
+  end
+  progressbar.finish
+
+  puts "there are now #{User.count} users with #{Order.count} orders"
+  pry
 end
 
 options[:weeks] = '8'

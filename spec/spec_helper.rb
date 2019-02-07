@@ -1,9 +1,27 @@
-require "bundler/setup"
-require "quiply"
+require 'simplecov'
+require 'bundler/setup'
+require 'database_cleaner'
+require 'rspec/collection_matchers'
+require 'rspec_command'
+require 'quiply'
 
 RSpec.configure do |config|
+  include Quiply
+  config.include RSpecCommand
+
+  config.before(:suite) do
+    DatabaseCleaner.strategy = :transaction
+    DatabaseCleaner.clean_with(:truncation)
+  end
+
+  config.around(:each) do |example|
+    DatabaseCleaner.cleaning do
+      example.run
+    end
+  end
+
   # Enable flags like --only-failures and --next-failure
-  config.example_status_persistence_file_path = ".rspec_status"
+  config.example_status_persistence_file_path = '.rspec_status'
 
   # Disable RSpec exposing methods globally on `Module` and `main`
   config.disable_monkey_patching!

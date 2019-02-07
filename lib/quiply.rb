@@ -1,4 +1,5 @@
-require "quiply/version"
+require 'terminal-table'
+require 'quiply/version'
 
 module Quiply
   class Error < StandardError; end

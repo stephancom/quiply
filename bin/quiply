@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+
+#              _       _       
+#   __ _ _   _(_)_ __ | |_   _ 
+#  / _` | | | | | '_ \| | | | |
+# | (_| | |_| | | |_) | | |_| |
+#  \__, |\__,_|_| .__/|_|\__, |
+#   by|_|stephan|_|dotcom|___/ 
+
+# quiply - cohorts challenge
+
+require 'methadone'
+require 'pry'
+require 'quiply'
+
+include Methadone::Main
+include Methadone::CLILogging
+include Quiply
+
+main do |users_csv, orders_csv|
+  puts "going to read #{users_csv}"
+  puts "going to read #{orders_csv}"
+end
+
+options[:weeks] = '8'
+options[:format] = 'txt'
+
+description <<~EODESC
+  given input CSV files of orders and users, group users into cohorts joined by week,
+  further subdivided into groups who placed a order in a given week after joining
+EODESC
+
+on('-w VALUE', '--weeks', 'override total weeks back of cohorts, default: 8')
+formats = %w[txt html csv]
+on('-f VALUE', '--format', formats, 'output format', "(#{formats.join('|')})")
+
+arg :users_csv, :required, 'input filename for users csv.'
+arg :orders_csv, :required, 'input filename for orders csv.'
+
+version Quiply::VERSION, compact: true
+
+go!

@@ -13,7 +13,7 @@ module Quiply
     end
 
     belongs_to :user, primary_key: :old_id, inverse_of: :orders, required: true
-    validates :order_num, presence: true # doesn't seem to be unique?
+    validates :order_num, uniqueness: { scope: :user_id }
     validates :old_id, uniqueness: true
 
     def self.count_orders_by_week(weeks_count = 8)

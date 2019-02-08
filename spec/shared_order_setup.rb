@@ -15,9 +15,9 @@ RSpec.shared_context 'four users with thirteen orders' do
 
     third_user.orders.create!(old_id: 107, created_at: start_date + 8.days, order_num: 1)
     third_user.orders.create!(old_id: 108, created_at: start_date + 10.days, order_num: 2)
-    third_user.orders.create!(old_id: 109, created_at: start_date + 12.days, order_num: 2)
-    third_user.orders.create!(old_id: 110, created_at: start_date + 13.days, order_num: 2)
-    third_user.orders.create!(old_id: 111, created_at: start_date + 24.days, order_num: 2)
+    third_user.orders.create!(old_id: 109, created_at: start_date + 12.days, order_num: 3)
+    third_user.orders.create!(old_id: 110, created_at: start_date + 13.days, order_num: 4)
+    third_user.orders.create!(old_id: 111, created_at: start_date + 24.days, order_num: 5)
 
     fourth_user.orders.create!(old_id: 112, created_at: start_date + 15.days, order_num: 1)
     fourth_user.orders.create!(old_id: 113, created_at: start_date + 18.days, order_num: 2)

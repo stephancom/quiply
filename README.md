@@ -47,6 +47,7 @@ Please output an html table or CSV that looks something like this. It should inc
 
 * do order numbers count up from 1 for a given user? assuming yes.
 * not clear what "weeks back worth of cohorts" - assuming this is columns of order weeks, rather than history back of cohort groups, mainly because it seems like you wouldn't want unlimited columns, though it sounds like you're asking to limit the number of rows?
+* I'm leaving cells blank where there are no sales - seems more readable
 
 ## Usage
 

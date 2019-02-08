@@ -9,7 +9,7 @@ require 'terminal-table'
 require 'quiply/version'
 require 'quiply/user'
 require 'quiply/order'
-
+require 'quiply/import'
 
 module Quiply
   class Error < StandardError; end

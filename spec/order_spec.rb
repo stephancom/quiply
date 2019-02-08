@@ -1,4 +1,3 @@
-require 'pry'
 RSpec.describe Quiply::Order do
   let(:old_user_id) { 123 }
   let!(:user) { User.create(old_id: old_user_id) }

@@ -11,8 +11,6 @@
 
 require 'methadone'
 require 'pry'
-require 'ruby-progressbar'
-require 'smarter_csv'
 require 'groupdate'
 require 'quiply'
 
@@ -20,37 +18,10 @@ include Methadone::Main
 include Methadone::CLILogging
 include Quiply
 
-# time in CSV is in nonstandard format mm/dd/yyyy hh:mm:ss
-# also, we've been told they "occured in PDT" so might as well handle that with the '-0800'
-MMDDYY_HHMMSS_REGEXP = /(?<month>\d\d)\/(?<day>\d\d)\/(?<year>\d\d\d\d)\s(?<time>\d\d:\d\d:\d\d)/.freeze
-def normalize_time(str)
-  # return str
-  parts = str.match(MMDDYY_HHMMSS_REGEXP)
-  "#{parts[:year]}-#{parts[:month]}-#{parts[:day]} #{parts[:time]} -0800"
-end
 
 main do |users_csv, orders_csv|
-  users = SmarterCSV.process(users_csv, key_mapping: { id: :old_id })
-  progressbar = ProgressBar.create(total: users.size, title: users_csv, format: '%t %c of %C |%B|')
-  users.each do |u|
-    progressbar.increment
-    u[:created_at] = normalize_time(u[:created_at])
-    u[:updated_at] = normalize_time(u[:updated_at])
-    User.create!(u)
-  end
-  progressbar.finish
-
-  orders = SmarterCSV.process(orders_csv, key_mapping: { id: :old_id })
-  progressbar = ProgressBar.create(total: orders.size, title: orders_csv, format: '%t %c of %C |%B|')
-  orders.each do |o|
-    progressbar.increment
-    next unless User.where(old_id: o[:user_id]).exists? # skip users not present
-    o[:created_at] = normalize_time(o[:created_at])
-    o[:updated_at] = normalize_time(o[:updated_at])
-    Order.create!(o)
-  end
-  progressbar.finish
-
+  Import.new(User).import(users_csv)
+  Import.new(Order).import(orders_csv)
   puts "there are now #{User.count} users with #{Order.count} orders"
 
   rows = []

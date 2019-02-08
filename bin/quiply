@@ -18,15 +18,6 @@ include Methadone::Main
 include Methadone::CLILogging
 include Quiply
 
-def to_percent(count, total, digits = 0)
-  "#{((count * 100) / total).round(digits)}%"
-end
-
-SPAN_FORMAT = '%-m/%-d'.freeze
-def timespan_format(span)
-  [span.first, span.last].map { |t| t.strftime(SPAN_FORMAT) }.join('-')
-end
-
 main do |users_csv, orders_csv|
   Groupdate.week_start = options[:start_day].to_sym
   maxweeks = options[:weeks].to_i
@@ -34,50 +25,19 @@ main do |users_csv, orders_csv|
   Import.new(Order).import(orders_csv)
   puts "there are now #{User.count} users with #{Order.count} orders"
 
-  rows = []
-  by_week = User.group_by_week(:created_at).count
-  by_week.each do |week, count|
-    new_row = []
-    timespan = week..(week + 1.week)
-    new_row << timespan_format(timespan)
-    users = User.where(created_at: timespan)
-    new_row << "#{count} users" # pluralize?
-    # find all orders made by these users, ever
-    user_orders = Order.where(user_id: users.pluck(:old_id))
-
-    previously_ordered_ids = []
-    user_orders.group_by_week(:created_at).count.each_with_index do |(week, count), weeknum|
-      next if weeknum >= maxweeks
-      order_timespan = week..(week + 1.week)
-      sub_orders = user_orders.where(created_at: order_timespan)
-      orderer_ids = sub_orders.pluck(:user_id).uniq
-      new_orderer_ids = orderer_ids - previously_ordered_ids
-      # puts weeknum.to_s * 40
-      # puts "count should be #{count} is #{sub_orders.count}"
-      # puts timespan_format(order_timespan)
-      # puts orderer_ids.sort.inspect
-      # puts previously_ordered_ids.sort.inspect
-      # puts new_orderer_ids.sort.inspect
-      # puts weeknum.to_s * 40
-      col_data = "#{to_percent(orderer_ids.count, users.count)} orderers (#{orderer_ids.count})\n#{to_percent(new_orderer_ids.count, users.count)} 1st Time (#{new_orderer_ids.count})"
-      previously_ordered_ids = (previously_ordered_ids + orderer_ids).uniq
-      new_row << col_data
-    end
-
-    rows << new_row
-  end
+  rows = User.tabulate_new_by_join_week(maxweeks)
 
   headings = %w[Cohort Users]
   max_cols = [rows.map(&:length).max, maxweeks + 2].min
-  headings += (0...(max_cols-2)).map { |w| "#{w*7}-#{(w+1)*7} days" }
+  headings += (0...(max_cols - 2)).map { |w| "#{w * 7}-#{(w + 1) * 7} days" }
 
   # pad out rows
-  rows = rows.map { |r| (r + [nil]*max_cols).first(max_cols) }
+  rows = rows.map { |r| (r + [nil] * max_cols).first(max_cols) }
 
   table = Terminal::Table.new rows: rows.reverse,
-                              headings: headings, #%w[Cohort Users 0-7 7-14 14-21 ...],
+                              headings: headings, # %w[Cohort Users 0-7 7-14 14-21 ...],
                               title: 'Cohort Challenge',
-                              style: {all_separators: true}
+                              style: { all_separators: true }
   table.align_column(1, :right)
   puts table
   pry

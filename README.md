@@ -1,9 +1,9 @@
 # Quiply [![Build Status](https://travis-ci.org/stephancom/quiply.svg?branch=master)](https://travis-ci.org/stephancom/quiply) [![Maintainability](https://api.codeclimate.com/v1/badges/1adc02f150a9309fd857/maintainability)](https://codeclimate.com/github/stephancom/quiply/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/1adc02f150a9309fd857/test_coverage)](https://codeclimate.com/github/stephancom/quiply/test_coverage)
 
-Quip cohort challenge
+### Quip cohort challenge
 
-# Spec
-## What we need
+## Spec
+### What we need
 
 Group users into week long cohorts based on the user's signup date. For each cohort, calculate:
 
@@ -11,7 +11,7 @@ Group users into week long cohorts based on the user's signup date. For each coh
 - The number of *distinct users* who ordered for the first time in each bucket
 
 
-## Output
+### Output
 
 Please output an html table or CSV that looks something like this. It should include Cohorts, # users, & entries for each bucket.
 
@@ -25,23 +25,28 @@ Please output an html table or CSV that looks something like this. It should inc
 | ... | ... | ... | ... | ... | ...
 
 
-## Data You Have
+### Data You Have
 
-### User
+#### User
 * id
 * created_at
 
-### Orders
+#### Orders
 * id
 * user_id
 * created_at
 * order_num **note: this field is 1-indexed**
 
-## Notes
+### Notes
 
 * Data ends in July '13
 * You should default to 8 weeks back worth of cohorts, would be nice if this is customizable (via parameter or form or something)
 * All dates are stored in UTC, but occured in PDT. Bonus points for handling that correctly.
+
+### *need clarification*
+
+* do order numbers count up from 1 for a given user? assuming yes.
+* not clear what "weeks back worth of cohorts" - assuming this is columns of order weeks, rather than history back of cohort groups, mainly because it seems like you wouldn't want unlimited columns, though it sounds like you're asking to limit the number of rows?
 
 ## Usage
 

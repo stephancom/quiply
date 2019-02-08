@@ -11,7 +11,6 @@
 
 require 'methadone'
 require 'pry'
-require 'groupdate'
 require 'quiply'
 
 include Methadone::Main
@@ -23,7 +22,6 @@ main do |users_csv, orders_csv|
   maxweeks = options[:weeks].to_i
   Import.new(User).import(users_csv)
   Import.new(Order).import(orders_csv)
-  puts "there are now #{User.count} users with #{Order.count} orders"
 
   rows = User.tabulate_new_by_join_week(maxweeks)
 
@@ -34,13 +32,35 @@ main do |users_csv, orders_csv|
   # pad out rows
   rows = rows.map { |r| (r + [nil] * max_cols).first(max_cols) }
 
-  table = Terminal::Table.new rows: rows.reverse,
-                              headings: headings, # %w[Cohort Users 0-7 7-14 14-21 ...],
-                              title: 'Cohort Challenge',
-                              style: { all_separators: true }
-  table.align_column(1, :right)
-  puts table
-  pry
+  io = options[:output] ? File.open(options[:output], 'w') : $stdout
+
+  case options[:format]
+  when 'txt'
+    table = Terminal::Table.new rows: rows.reverse,
+                                headings: headings, # %w[Cohort Users 0-7 7-14 14-21 ...],
+                                title: 'Cohort Challenge',
+                                style: { all_separators: true }
+    table.align_column(1, :right)
+    io.puts table
+  when 'csv'
+    CSV(io) do |csv|
+      csv << headings
+      rows.reverse_each { |r| csv << r }
+    end
+  when 'html'
+    io.write '<table>'
+    io.write '<thead><tr>'
+    io.write(headings.map { |h| "<th>#{h}</th>" }.join)
+    io.write '</tr></thead>'
+    io.write '<tbody>'
+    rows.reverse_each do |row|
+      io.write '<tr>'
+      io.write(row.map { |c| c.nil? ? '<td></td>' : "<td>#{c.split("\n").join('</br>')}</td>" }.join)
+      io.write '</tr>'
+    end
+    io.write '</tbody>'
+    io.write '</table>'
+  end
 end
 
 options[:weeks] = '8'
@@ -57,6 +77,7 @@ formats = %w[txt html csv]
 on('-f VALUE', '--format', formats, 'output format, default: txt', "(#{formats.join('|')})")
 days = %w[sun mon tue wed thu fri sat]
 on('-s VALUE', '--start_day', days, 'day to start week, default: sun', "(#{days.join('|')})")
+on('-o VALUE', '--output', 'output filename, default: stdout')
 
 arg :users_csv, :required, 'input filename for users csv.'
 arg :orders_csv, :required, 'input filename for orders csv.'

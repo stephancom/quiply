@@ -1,0 +1,112 @@
+#!/usr/bin/env ruby
+
+# fakes for    _       _
+#   __ _ _   _(_)_ __ | |_   _
+#  / _` | | | | | '_ \| | | | |
+# | (_| | |_| | | |_) | | |_| |
+#  \__, |\__,_|_| .__/|_|\__, |
+#   by|_|stephan|_|dotcom|___/
+
+# quiply - cohorts challenge
+# fakes generator
+
+require 'ruby-progressbar'
+require 'methadone'
+require 'quiply'
+
+include Methadone::Main
+include Methadone::CLILogging
+include Quiply
+
+FIRST_DATE = Time.parse('2014-10-31 17:01:00 -0800')
+DURATION = (250*24).hours
+LAST_DATE = FIRST_DATE + DURATION
+
+def random_ids(count)
+  (1..(10 * count)).to_a.sample(count)
+end
+
+def random_date
+  FIRST_DATE + (DURATION * rand)
+end
+
+def random_date_since(date)
+  date + ((LAST_DATE - date) * rand)
+end
+
+def format_date(date)
+  date.strftime('%m/%d/%Y %H:%M:%S')
+end
+
+main do
+  users_count = options[:users].to_i
+  orders_count = options[:orders].to_i
+  file_prefix = options[:prefix]
+
+  # pick out ID's
+  user_ids = random_ids(users_count)
+  order_ids = random_ids(orders_count)
+
+  progressbar = ProgressBar.create(total: users_count, title: 'User', format: '%t %c of %C |%B|')
+  user_ids.each do |old_id|
+    progressbar.increment
+    User.create(old_id: old_id) do |u|
+      u.created_at = random_date
+      u.updated_at = random_date_since(u.created_at)
+    end
+  end
+  progressbar.finish
+
+
+  progressbar = ProgressBar.create(total: orders_count, title: 'Order', format: '%t %c of %C |%B|')
+  order_ids.each_with_index do |old_id|
+    progressbar.increment
+    u = User.all.sample
+    Order.create(old_id: old_id, user_id: u.old_id) do |o|
+      latest_order = u.orders.order(order_num: :asc).last
+      if latest_order.nil?
+        o.order_num = 1
+        o.created_at = random_date_since(u.created_at)
+      else
+        o.order_num = latest_order.order_num + 1
+        o.created_at = random_date_since(latest_order.created_at)
+      end
+      o.updated_at = o.created_at + ((15 * 24).hours * rand)
+    end
+  end
+  progressbar.finish
+
+  users = [%w[id created_at updated_at]]
+  orders = [%w[id order_num user_id created_at updated_at]]
+
+  users += User.all.map { |u| [u.old_id, format_date(u.created_at), format_date(u.updated_at)] }.shuffle
+  orders += Order.all.map { |o| [o.old_id, o.order_num, o.user_id, format_date(o.created_at), format_date(o.updated_at)] }.shuffle
+
+  CSV.open("#{file_prefix}_users.csv",'w') do |csv|
+    users.each do |row|
+      csv << row
+    end
+  end
+
+  CSV.open("#{file_prefix}_orders.csv",'w') do |csv|
+    orders.each do |row|
+      csv << row
+    end
+  end
+end
+
+options[:users] = '500'
+options[:orders] = '1500'
+options[:prefix] = 'spec/fixtures/random'
+
+description <<~EODESC
+  given a count of users and orders, make a bunch of fakes for CSVs
+EODESC
+
+on('-u VALUE', '--users', "user count, default: #{options[:users]}")
+on('-o VALUE', '--orders', "orders count, default: #{options[:orders]}")
+on('-p VALUE', '--prefix', "prefix for output files, default: #{options[:prefix]}")
+
+version Quiply::VERSION, compact: true
+
+go!

@@ -16,7 +16,7 @@ module Quiply
     validates :order_num, presence: true # doesn't seem to be unique?
     validates :old_id, uniqueness: true
 
-    def self.count_orders_by_week(weeks_count)
+    def self.count_orders_by_week(weeks_count = 8)
       group_by_week(:created_at).count.first(weeks_count).map do |(week, _)|
         week_orders = where(created_at: week..(week + 1.week))
         first_orders = week_orders.where(order_num: 1)

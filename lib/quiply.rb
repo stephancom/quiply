@@ -5,6 +5,7 @@ ActiveRecord::Base.establish_connection(
   database: ':memory:'
 )
 
+require 'groupdate'
 require 'terminal-table'
 require 'quiply/version'
 require 'quiply/user'

@@ -16,10 +16,6 @@ module Quiply
     validates :order_num, presence: true # doesn't seem to be unique?
     validates :old_id, uniqueness: true
 
-    def self.to_percent(count, total, digits = 0)
-      "#{((count * 100) / total).round(digits)}%"
-    end
-
     def self.count_orders_by_week(weeks_count)
       group_by_week(:created_at).count.first(weeks_count).map do |(week, _)|
         week_orders = where(created_at: week..(week + 1.week))
@@ -33,8 +29,8 @@ module Quiply
       count_orders_by_week(weeks_count).map do |w|
         # TODO: I18n
         <<~EOWEEK
-          #{to_percent(w[:orderers], users_count)} orderers (#{w[:orderers]})
-          #{to_percent(w[:first_orders], users_count)} 1st Time (#{w[:first_orders]})
+          #{Quiply.to_percent(w[:orderers], users_count)} orderers (#{w[:orderers]})
+          #{Quiply.to_percent(w[:first_orders], users_count)} 1st Time (#{w[:first_orders]})
         EOWEEK
       end
     end

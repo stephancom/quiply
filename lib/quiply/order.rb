@@ -20,26 +20,23 @@ module Quiply
       "#{((count * 100) / total).round(digits)}%"
     end
 
-    def self.tabulate_by_user_week(users_count, order_weeks = 8)
-      # this would be much simpler if I knew order_id was an always-increasing number for orders from a given user
-      previously_ordered_ids = []
-      new_row = []
-      self.group_by_week(:created_at).count.each_with_index do |(week, count), weeknum|
-        next if weeknum >= order_weeks
-        order_timespan = week..(week + 1.week)
-        sub_orders = self.where(created_at: order_timespan)
-        if sub_orders.any?
-          orderer_ids = sub_orders.pluck(:user_id).uniq
-          new_orderer_ids = orderer_ids - previously_ordered_ids
-          col_data = "#{to_percent(orderer_ids.count, users_count)} orderers (#{orderer_ids.count})\n#{to_percent(new_orderer_ids.count, users_count)} 1st Time (#{new_orderer_ids.count})"
-          previously_ordered_ids = (previously_ordered_ids + orderer_ids).uniq
-          col_data = '' if orderer_ids.empty?
-          new_row << col_data
-        else
-          new_row << ''
-        end
+    def self.count_orders_by_week(weeks_count)
+      group_by_week(:created_at).count.first(weeks_count).map do |(week, _)|
+        week_orders = where(created_at: week..(week + 1.week))
+        first_orders = week_orders.where(order_num: 1)
+        { orderers: week_orders.pluck(:user_id).uniq.count,
+          first_orders: first_orders.count }
       end
-      new_row
+    end
+
+    def self.tabulate_by_user_week(users_count, weeks_count = 8)
+      count_orders_by_week(weeks_count).map do |w|
+        # TODO: I18n
+        <<~EOWEEK
+          #{to_percent(w[:orderers], users_count)} orderers (#{w[:orderers]})
+          #{to_percent(w[:first_orders], users_count)} 1st Time (#{w[:first_orders]})
+        EOWEEK
+      end
     end
   end
 end

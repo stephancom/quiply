@@ -19,22 +19,13 @@ module Quiply
     end
 
     def self.tabulate_new_by_join_week(order_weeks = 8)
-      rows = []
-      by_week = self.group_by_week(:created_at).count
-      by_week.each do |week, count|
-        new_row = []
+      group_by_week(:created_at).count.map do |(week, count)|
         timespan = week..(week + 1.week)
-        new_row << timespan_format(timespan)
-        users = self.where(created_at: timespan)
-        new_row << "#{count} users" # pluralize?
-        # find all orders made by these users, ever
+        users = where(created_at: timespan)
         user_orders = Order.where(user_id: users.pluck(:old_id))
-
-        new_row += user_orders.tabulate_by_user_week(users.count, order_weeks)
-
-        rows << new_row
+        [timespan_format(timespan), "#{count} users"] + # TODO: I18n
+          user_orders.tabulate_by_user_week(users.count, order_weeks)
       end
-      rows
     end
   end
 end

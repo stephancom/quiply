@@ -10,7 +10,6 @@
 # quiply - cohorts challenge
 
 require 'methadone'
-require 'pry'
 require 'quiply'
 
 include Methadone::Main
@@ -33,7 +32,6 @@ main do |users_csv, orders_csv|
   rows = rows.map { |r| (r + [nil] * max_cols).first(max_cols) }
 
   io = options[:output] ? File.open(options[:output], 'w') : $stdout
-
   case options[:format]
   when 'txt'
     table = Terminal::Table.new rows: rows.reverse,

@@ -17,7 +17,7 @@ module Quiply
       group_by_week(:created_at).count.map do |(week, count)|
         timespan = week..(week + 1.week)
         users = where(created_at: timespan)
-        user_orders = Order.where(user_id: users.pluck(:old_id))
+        user_orders = Order.joins(:user).where(users: { created_at: timespan })
         [Quiply.timespan_format(timespan), "#{count} users"] + # TODO: I18n
           user_orders.tabulate_by_user_week(users.count, order_weeks)
       end
